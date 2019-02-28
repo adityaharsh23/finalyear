@@ -7,69 +7,55 @@
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 //pre functions start
+float fv; //fieldvalue
 //gps pre function begin
 TinyGPSPlus gps;  // The TinyGPS++ object
-
 SoftwareSerial ss(4, 5); // The serial connection to the GPS device
-
-const char* ssid = "scither";
-const char* password = "bablubanarasiyk";
-
+const char* ssid = "POCO F1";
+const char* password = "anubhav1";
 float latitude , longitude;
 int year , month , date, hour , minute , second;
-String date_str , time_str , lat_str , lng_str;
-int pm;
-
+//String date_str , time_str , lat_str , lng_str;
+//int pm;
 WiFiServer server(80);
 //gps pre function ends
+
 //send data pre function begins
-const char* ssid = "POCO F1"; //Your Network SSID
- 
-const char* password = "anubhav1"; //Your Network Password
- 
-int val1,val2;
- 
-//int LDRpin = A0; //LDR Pin Connected at A0 Pin
- 
- 
- 
+//const char* ssid = "POCO F1"; //Your Network SSID
+//const char* password = "anubhav1"; //Your Network Password
+int lat,lon;
 WiFiClient client;
- 
 unsigned long myChannelNumber = 714903; //Your Channel Number (Without Brackets)
- 
 const char * myWriteAPIKey = "Z6GOD6KR8F2ZBUVG"; //Your Write API Key
 //send data pre function ends
-//recieve pre function begins
-WiFiServer server(80); 
 
+//recieve pre function begins
+//WiFiServer server(80); 
 char   host[] = "api.thingspeak.com"; // ThingSpeak address
 String APIkey = "714951";             // Thingspeak Read Key, works only if a PUBLIC viewable channel
-const int httpPort = 80;
- 
-const char *ssid     = "POCO F1"; 
-const char *password = "anubhav1"; 
+const int httpPort = 80; 
+//const char *ssid     = "POCO F1"; 
+//const char *password = "anubhav1"; 
 //WiFiClient client;
 const unsigned long HTTP_TIMEOUT = 10000; // max respone time from server
 //recieve pre function ends
+
 //bot movement pre fucntion begins
 /* define L298N or L293D motor control pins */
 //int leftMotorForward = 2;     /* GPIO2(D4) -> IN3   */
 int leftMotorForward = 12;
 int rightMotorForward = 15;   /* GPIO15(D8) -> IN1  */
 //int leftMotorBackward = 0;
-
 int leftMotorBackward = 10;/* GPIO0(D3) -> IN4   */
 int rightMotorBackward = 13;  /* GPIO13(D7) -> IN2  */
-
-
 /* define L298N or L293D enable pins */
 int rightMotorENB = 14; /* GPIO14(D5) -> Motor-A Enable */
 int leftMotorENB = 12; /* GPIO12(D6) -> Motor-B Enable */
 //bot movement pre function ends
 
-%pre functions end
+//pre functions end
 
-%setup begins
+//setup begins
 void setup()
 {
 //gps begin
@@ -97,15 +83,15 @@ Serial.begin(115200);
 
 //gps end
 //send data start
-Serial.begin(9600);
+//Serial.begin(9600);
  delay(10);
  // Connect to WiFi network 
-WiFi.begin(ssid, password);
+//WiFi.begin(ssid, password);
 ThingSpeak.begin(client);
  //send data end
 //recieve data begin
-Serial.begin(115200);
-WiFi.begin(ssid,password);
+//Serial.begin(115200);
+//WiFi.begin(ssid,password);
 //recieve data end
 //bot movement start
   /* initialize motor control pins as output */
@@ -123,7 +109,7 @@ WiFi.begin(ssid,password);
 int diffb;
 //bot movement end
 }
-%setup ends
+//setup ends
 
 %loop begins
 void loop()
@@ -134,9 +120,9 @@ void loop()
     {
       if (gps.location.isValid())
       {
-        latitude = gps.location.lat();
+        latitude = gps.location.lat(); //numerical value(float)
         lat_str = String(latitude , 6);
-        longitude = gps.location.lng();
+        longitude = gps.location.lng(); //numerical value (float)
         lng_str = String(longitude , 6);
         Serial.print(latitude);
         Serial.print("Lat\n");
@@ -144,78 +130,6 @@ void loop()
         Serial.print("Lon\n");
         
       }
-
-      if (gps.date.isValid())
-      {
-        date_str = "";
-        date = gps.date.day();
-        month = gps.date.month();
-        year = gps.date.year();
-
-        if (date < 10)
-          date_str = '0';
-        date_str += String(date);
-
-        date_str += " / ";
-
-        if (month < 10)
-          date_str += '0';
-        date_str += String(month);
-
-        date_str += " / ";
-
-        if (year < 10)
-          date_str += '0';
-        date_str += String(year);
-      }
-
-      if (gps.time.isValid())
-      {
-        time_str = "";
-        hour = gps.time.hour();
-        minute = gps.time.minute();
-        second = gps.time.second();
-
-        minute = (minute + 30);
-        if (minute > 59)
-        {
-          minute = minute - 60;
-          hour = hour + 1;
-        }
-        hour = (hour + 5) ;
-        if (hour > 23)
-          hour = hour - 24;
-
-        if (hour >= 12)
-          pm = 1;
-        else
-          pm = 0;
-
-        hour = hour % 12;
-
-        if (hour < 10)
-          time_str = '0';
-        time_str += String(hour);
-
-        time_str += " : ";
-
-        if (minute < 10)
-          time_str += '0';
-        time_str += String(minute);
-
-        time_str += " : ";
-
-        if (second < 10)
-          time_str += '0';
-        time_str += String(second);
-
-        if (pm == 1)
-          time_str += " PM ";
-        else
-          time_str += " AM ";
-
-      }
-
     }
   // Check if a client has connected
   WiFiClient client = server.available();
@@ -225,55 +139,56 @@ void loop()
   }
 
   // Prepare the response
-  String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n <!DOCTYPE html> <html> <head> <title>GPS Interfacing with NodeMCU</title> <style>";
-  s += "a:link {background-color: YELLOW;text-decoration: none;}";
-  s += "table, th, td {border: 1px solid black;} </style> </head> <body> <h1  style=";
-  s += "font-size:300%;";
-  s += " ALIGN=CENTER> GPS Interfacing with NodeMCU</h1>";
-  s += "<p ALIGN=CENTER style=""font-size:150%;""";
-  s += "> <b>Location Details</b></p> <table ALIGN=CENTER style=";
-  s += "width:50%";
-  s += "> <tr> <th>Latitude</th>";
-  s += "<td ALIGN=CENTER >";
-  s += lat_str;
-  s += "</td> </tr> <tr> <th>Longitude</th> <td ALIGN=CENTER >";
-  s += lng_str;
-  s += "</td> </tr> <tr>  <th>Date</th> <td ALIGN=CENTER >";
-  s += date_str;
-  s += "</td></tr> <tr> <th>Time</th> <td ALIGN=CENTER >";
-  s += time_str;
-  s += "</td>  </tr> </table> ";
+  //String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n <!DOCTYPE html> <html> <head> <title>GPS Interfacing with NodeMCU</title> <style>";
+  //s += "a:link {background-color: YELLOW;text-decoration: none;}";
+  //s += "table, th, td {border: 1px solid black;} </style> </head> <body> <h1  style=";
+  //s += "font-size:300%;";
+  //s += " ALIGN=CENTER> GPS Interfacing with NodeMCU</h1>";
+  //s += "<p ALIGN=CENTER style=""font-size:150%;""";
+  //s += "> <b>Location Details</b></p> <table ALIGN=CENTER style=";
+  //s += "width:50%";
+  //s += "> <tr> <th>Latitude</th>";
+  //s += "<td ALIGN=CENTER >";
+  //s += lat_str;
+  //s += "</td> </tr> <tr> <th>Longitude</th> <td ALIGN=CENTER >";
+  //s += lng_str;
+  //s += "</td> </tr> <tr>  <th>Date</th> <td ALIGN=CENTER >";
+  //s += date_str;
+  //s += "</td></tr> <tr> <th>Time</th> <td ALIGN=CENTER >";
+  //s += time_str;
+  //s += "</td>  </tr> </table> ";
  
   
-  if (gps.location.isValid())
-  {
-     s += "<p align=center><a style=""color:RED;font-size:125%;"" href=""http://maps.google.com/maps?&z=15&mrt=yp&t=k&q=";
-    s += lat_str;
-    s += "+";
-    s += lng_str;
-    s += """ target=""_top"">Click here!</a> To check the location in Google maps.</p>";
-  }
+  //if (gps.location.isValid())
+  //{
+    //s += "<p align=center><a style=""color:RED;font-size:125%;"" href=""http://maps.google.com/maps?&z=15&mrt=yp&t=k&q=";
+    //s += lat_str;
+    //s += "+";
+    //s += lng_str;
+    //s += """ target=""_top"">Click here!</a> To check the location in Google maps.</p>";
+  //}
 
-  s += "</body> </html> \n";
+  //s += "</body> </html> \n";
 
-  client.print(s);
+client.print(s);
 delay(100);
 //gps end
 //send begin
-val1 = 10;
-val2=15;
+//val1 = 10;
+//val2=15;
 //analogRead(LDRpin); //Read Analog values and Store in val variable
- 
-Serial.print(val1);
-Serial.print(val2);
+ Serial.println("Uploading data to thingspeak:")
+  Serial.print("Lat:");
+Serial.println(latitude);
+Serial.print("Lon:");
+ Serial.print(longitude);
 //Print on Serial Monitor
  
 delay(1000);
  
-ThingSpeak.writeField(myChannelNumber, 1,val1, myWriteAPIKey);
-ThingSpeak.writeField(myChannelNumber, 2,val2, myWriteAPIKey);
+ThingSpeak.writeField(myChannelNumber, 1,latitude, myWriteAPIKey);
+ThingSpeak.writeField(myChannelNumber, 2,longitude, myWriteAPIKey);
 //Update in ThingSpeak
-  
 delay(15000);
  
 //send end
@@ -282,6 +197,7 @@ RetrieveTSChannelData();
 delay(60000); //Wait before we request again
 //recieve end
 //bot begin
+ nb=atoi(fv);
 if(nb>ob)
   {
     diffb=nb-ob;
@@ -359,6 +275,7 @@ bool decodeJSON(char *json) {
     String field1value  = channel["field1"];
     Serial.print(" Field1 entry number ["+entry_id+"] had a value of: ");
     Serial.println(field1value);
+   fv=field1value;
   }
 }
 void GolGolDrift(void)
