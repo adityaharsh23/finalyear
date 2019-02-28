@@ -3,7 +3,7 @@
 #include <WiFiClient.h>;
 #include <ThingSpeak.h>;
 #include <ESP8266WiFi.h>
-#include <ArduinoJson.h>
+#include <ArduinoJson.h>  //ver 5.13.4 only
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 //pre functions start
@@ -214,6 +214,7 @@ if(nb>ob)
   ob=nb;
 delay(10000);
 //bot end
+  delay(30000)
 }
 //loop ends
 
