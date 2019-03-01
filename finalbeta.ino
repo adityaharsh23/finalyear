@@ -15,6 +15,9 @@ const char* ssid = "POCO F1";
 const char* password = "anubhav1";
 float latitude , longitude;
 int year , month , date, hour , minute , second;
+static int nb,ob;
+int dely;
+int diffb;
 //String date_str , time_str , lat_str , lng_str;
 //int pm;
 WiFiServer server(80);
@@ -103,15 +106,14 @@ ThingSpeak.begin(client);
   /* initialize motor enable pins as output */
   pinMode(leftMotorENB, OUTPUT); 
   pinMode(rightMotorENB, OUTPUT);
-  static int nb,ob;
+  
   ob=0;
-  int dely;
-int diffb;
+  
 //bot movement end
 }
 //setup ends
 
-%loop begins
+//loop begins
 void loop()
 {
 //gps begin
@@ -121,9 +123,9 @@ void loop()
       if (gps.location.isValid())
       {
         latitude = gps.location.lat(); //numerical value(float)
-        lat_str = String(latitude , 6);
+        //lat_str = String(latitude , 6);
         longitude = gps.location.lng(); //numerical value (float)
-        lng_str = String(longitude , 6);
+        //lng_str = String(longitude , 6);
         Serial.print(latitude);
         Serial.print("Lat\n");
         Serial.print(longitude);
@@ -170,14 +172,14 @@ void loop()
 
   //s += "</body> </html> \n";
 
-client.print(s);
+//client.print(s);
 delay(100);
 //gps end
 //send begin
 //val1 = 10;
 //val2=15;
 //analogRead(LDRpin); //Read Analog values and Store in val variable
- Serial.println("Uploading data to thingspeak:")
+ Serial.println("Uploading data to thingspeak:");
   Serial.print("Lat:");
 Serial.println(latitude);
 Serial.print("Lon:");
@@ -197,7 +199,7 @@ RetrieveTSChannelData();
 delay(60000); //Wait before we request again
 //recieve end
 //bot begin
- nb=atoi(fv);
+ nb=fv;
 if(nb>ob)
   {
     diffb=nb-ob;
@@ -214,7 +216,7 @@ if(nb>ob)
   ob=nb;
 delay(10000);
 //bot end
-  delay(30000)
+  delay(30000);
 }
 //loop ends
 
@@ -276,7 +278,7 @@ bool decodeJSON(char *json) {
     String field1value  = channel["field1"];
     Serial.print(" Field1 entry number ["+entry_id+"] had a value of: ");
     Serial.println(field1value);
-   fv=field1value;
+   fv=field1value.toInt(); //*8888888888888888888888888888888888888888888888888888888888888
   }
 }
 void GolGolDrift(void)
