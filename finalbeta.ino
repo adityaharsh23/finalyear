@@ -15,9 +15,12 @@ const char* ssid = "POCO F1";
 const char* password = "anubhav1";
 float latitude , longitude;
 //int year , month , date, hour , minute , second;
-static int nb,ob;
-int dely;
-int diffb;
+int nb;
+int ob=0;
+//ob=10;
+float dely;
+float diffb;
+int counter=0;
 //String date_str , time_str , lat_str , lng_str;
 //int pm;
 WiFiServer server(80);
@@ -28,14 +31,14 @@ WiFiServer server(80);
 //const char* password = "anubhav1"; //Your Network Password
 int lat,lon;
 WiFiClient client;
-unsigned long myChannelNumber = 716643; //Your Channel Number (Without Brackets)
-const char * myWriteAPIKey = "BDWILOQ33C4WH2KJ"; //Your Write API Key
+unsigned long myChannelNumber = 716675; //Your Channel Number (Without Brackets)
+const char * myWriteAPIKey = "3F0X694HYNGO5PJ9"; //Your Write API Key
 //send data pre function ends
 
 //recieve pre function begins
 //WiFiServer server(80); 
 char   host[] = "api.thingspeak.com"; // ThingSpeak address
-String APIkey = "714951";             // Thingspeak Read Key, works only if a PUBLIC viewable channel
+String APIkey = "716643";             // Thingspeak Read Key, works only if a PUBLIC viewable channel
 const int httpPort = 80; 
 //const char *ssid     = "POCO F1"; 
 //const char *password = "anubhav1"; 
@@ -63,6 +66,7 @@ void setup()
 {
 //gps begin
 Serial.begin(115200);
+Serial.print("prefunction");
   ss.begin(9600);
   Serial.println();
   Serial.print("Connecting to ");
@@ -91,6 +95,7 @@ Serial.begin(115200);
  // Connect to WiFi network 
 //WiFi.begin(ssid, password);
 ThingSpeak.begin(client);
+Serial.print("thingspeak started");
  //send data end
 //recieve data begin
 //Serial.begin(115200);
@@ -117,7 +122,8 @@ ThingSpeak.begin(client);
 void loop()
 {
 //gps begin
-  while (ss.available() > 0)
+//Serial.print("loop begins");
+  //while (ss.available() > 0 && counter<1){
     if (gps.encode(ss.read()))
     {
       if (gps.location.isValid())
@@ -130,55 +136,19 @@ void loop()
         Serial.print("Lat\n");
         Serial.print(longitude);
         Serial.print("Lon\n");
+        counter++;
         
       }
     }
-  // Check if a client has connected
-  WiFiClient client = server.available();
-  if (!client)
-  {
-    return;
-  }
-
-  // Prepare the response
-  //String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n <!DOCTYPE html> <html> <head> <title>GPS Interfacing with NodeMCU</title> <style>";
-  //s += "a:link {background-color: YELLOW;text-decoration: none;}";
-  //s += "table, th, td {border: 1px solid black;} </style> </head> <body> <h1  style=";
-  //s += "font-size:300%;";
-  //s += " ALIGN=CENTER> GPS Interfacing with NodeMCU</h1>";
-  //s += "<p ALIGN=CENTER style=""font-size:150%;""";
-  //s += "> <b>Location Details</b></p> <table ALIGN=CENTER style=";
-  //s += "width:50%";
-  //s += "> <tr> <th>Latitude</th>";
-  //s += "<td ALIGN=CENTER >";
-  //s += lat_str;
-  //s += "</td> </tr> <tr> <th>Longitude</th> <td ALIGN=CENTER >";
-  //s += lng_str;
-  //s += "</td> </tr> <tr>  <th>Date</th> <td ALIGN=CENTER >";
-  //s += date_str;
-  //s += "</td></tr> <tr> <th>Time</th> <td ALIGN=CENTER >";
-  //s += time_str;
-  //s += "</td>  </tr> </table> ";
- 
   
-  //if (gps.location.isValid())
-  //{
-    //s += "<p align=center><a style=""color:RED;font-size:125%;"" href=""http://maps.google.com/maps?&z=15&mrt=yp&t=k&q=";
-    //s += lat_str;
-    //s += "+";
-    //s += lng_str;
-    //s += """ target=""_top"">Click here!</a> To check the location in Google maps.</p>";
-  //}
+  //Serial.print("While ends");
+  // Check if a client has connected
+//  WiFiClient client = server.available();
+//  if (!client)
+//  {
+//    return;
+//  }
 
-  //s += "</body> </html> \n";
-
-//client.print(s);
-delay(100);
-//gps end
-//send begin
-//val1 = 10;
-//val2=15;
-//analogRead(LDRpin); //Read Analog values and Store in val variable
  Serial.println("Uploading data to thingspeak:");
   Serial.print("Lat:");
 Serial.println(latitude);
@@ -189,14 +159,18 @@ Serial.print("Lon:");
 delay(1000);
  
 ThingSpeak.writeField(myChannelNumber, 1,latitude, myWriteAPIKey);
-ThingSpeak.writeField(myChannelNumber, 2,longitude, myWriteAPIKey);
+delay(15000);
+ThingSpeak.writeField(716686, 1,longitude, "GJXBTXZVVZ1HKPI0");
+Serial.print("upload done");
 //Update in ThingSpeak
 delay(15000);
  
 //send end
 //recieve begin
+Serial.print("recieving data");
 RetrieveTSChannelData();
-delay(60000); //Wait before we request again
+delay(60000);
+Serial.print("recieved");//Wait before we request again
 //recieve end
 //bot begin
  nb=fv;
@@ -208,8 +182,13 @@ if(nb>ob)
   {
     diffb=360-(nb-ob);
   }
-  dely=((352/360)*(nb-ob))/13.037;
+  dely=(0.97*diffb)/13.037;
   dely=dely*1000; 
+  delay(15000);
+  Serial.print("Bot will now move::");
+  Serial.print(diffb);
+  Serial.print("with delay");
+  Serial.print(dely);
   GolGolDrift();
   delay(dely);
   MotorStop();
@@ -278,6 +257,7 @@ bool decodeJSON(char *json) {
     String field1value  = channel["field1"];
     Serial.print(" Field1 entry number ["+entry_id+"] had a value of: ");
     Serial.println(field1value);
+    //enter max value
    fv=field1value.toInt(); //*8888888888888888888888888888888888888888888888888888888888888
   }
 }
