@@ -14,7 +14,7 @@ SoftwareSerial ss(4, 5); // The serial connection to the GPS device
 const char* ssid = "POCO F1";
 const char* password = "anubhav1";
 float latitude , longitude;
-int year , month , date, hour , minute , second;
+//int year , month , date, hour , minute , second;
 static int nb,ob;
 int dely;
 int diffb;
@@ -28,8 +28,8 @@ WiFiServer server(80);
 //const char* password = "anubhav1"; //Your Network Password
 int lat,lon;
 WiFiClient client;
-unsigned long myChannelNumber = 714903; //Your Channel Number (Without Brackets)
-const char * myWriteAPIKey = "Z6GOD6KR8F2ZBUVG"; //Your Write API Key
+unsigned long myChannelNumber = 716643; //Your Channel Number (Without Brackets)
+const char * myWriteAPIKey = "BDWILOQ33C4WH2KJ"; //Your Write API Key
 //send data pre function ends
 
 //recieve pre function begins
