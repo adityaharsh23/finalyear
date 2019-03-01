@@ -1,0 +1,44 @@
+% Template MATLAB code for reading data from a private channel, analyzing
+% the data and storing the analyzed data in another channel.
+
+% Prior to running this MATLAB code template, assign the channel ID to read
+% data from to the 'readChannelID' variable. Since this is a private
+% channel, also assign the read API Key to the 'readAPIKey' variable. You
+% can find the read API Key in the right side pane of this page.
+
+% To store the analyzed data, you will need to write it to a channel other
+% than the one you are reading data from. Assign this channel ID to the
+% 'writeChannelID' variable. Also assign the write API Key to the
+% 'writeAPIKey' variable below. You can find the write API Key in the right
+% side pane of this page.
+
+% TODO - Replace the [] with channel ID to read data from:
+readChannelID =714903;
+% TODO - Enter the Read API Key between the '' below:
+readAPIKey = 'VAQXA4UOYIEIYCPJ';
+
+% TODO - Replace the [] with channel ID to write data to:
+writeChannelID =714951;
+% TODO - Enter the Write API Key between the '' below:
+writeAPIKey = '2MIJN1QYE6NLKWI7';
+
+%% Read Data %%
+data = thingSpeakRead(readChannelID, 'ReadKey', readAPIKey);
+data1= thingSpeakRead(readChannelID, 'ReadKey', readAPIKey);
+lat1=55.739399;
+lon1=37.592572;
+%lat2=55.735632;
+%lon2=37.678367;
+res=azimuth(lat1,lon1,data,data1);
+%res2=deg2km(distance(lat1, lon1, lat2, lon2));
+sprintf("Angle Between Co ordinates is: %f degrees",res)
+%sprintf("Distance Between co ordinates is: %f Km",res2)
+res;
+%% Analyze Data %%
+% Add code in this section to analyze data and store the result in the
+% analyzedData variable.
+analyzedData = res;
+
+
+%% Write Data %%
+thingSpeakWrite(writeChannelID, analyzedData, 'WriteKey', writeAPIKey);
