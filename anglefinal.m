@@ -7,10 +7,10 @@ lon1=37.592572;
 lat2=55.735632;
 lon2=37.678367;
 res=azimuth(lat1,lon1,lat2,lon2);
-res2=deg2km(distance(lat1, lon1, lat2, lon2));
+//res2=deg2km(distance(lat1, lon1, lat2, lon2));
 sprintf("Angle Between Co ordinates is: %f degrees",res)
-sprintf("Distance Between co ordinates is: %f Km",res2)
+//sprintf("Distance Between co ordinates is: %f Km",res2)
 res;
-res2;
+//res2;
 
 %distance
