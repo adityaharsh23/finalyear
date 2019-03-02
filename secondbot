@@ -14,8 +14,8 @@ float lat1,lon1;
 WiFiServer server(80);
 
 WiFiClient client;
-unsigned long myChannelNumber = 716675; //Your Channel Number (Without Brackets)
-const char * myWriteAPIKey = "3F0X694HYNGO5PJ9"; //Your Write API Key
+unsigned long myChannelNumber = 717502; //Your Channel Number (Without Brackets)
+const char * myWriteAPIKey = "854IANACKQANIKAC"; //Your Write API Key
 //bot movement pre fucntion begins
 /* define L298N or L293D motor control pins */
 //int leftMotorForward = 2;     /* GPIO2(D4) -> IN3   */
@@ -101,13 +101,14 @@ while (ss.available() > 0)
 delay(1000);
  
 ThingSpeak.writeField(myChannelNumber, 1,lat1, myWriteAPIKey);
-ThingSpeak.writeField(716686, 1,lon1, "GJXBTXZVVZ1HKPI0");
+ThingSpeak.writeField(717515, 1,lon1, "3J22WNZK9MB1YKVD");
 delay(5000);
 Serial.print("\n uploaded");
 MotorBackward();
 delay(5000);
+Serial.print("backward");
 MotorStop();
-delay(60000);
+delay(5000);
 
 }
 }        
