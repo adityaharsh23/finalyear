@@ -1,0 +1,14 @@
+r1 = rand(10,1);
+r1=r1/100000;
+lat=12.973630;
+lon=79.159729;
+r2=rand(10,1);
+r2=r2/100000;
+r1=r1+lat;
+r2=r2+lon;
+sprintf("lat");
+format long
+r1
+sprintf("longitude");
+format long 
+r2
