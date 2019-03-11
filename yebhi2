@@ -1,0 +1,227 @@
+//gps data.. send.. move
+#include <ESP8266WiFi.h>;
+#include <WiFiClient.h>;
+#include <ThingSpeak.h>;
+#include <ESP8266WiFi.h>
+#include<ArduinoJson.h>
+#include <TinyGPS++.h>
+#include <SoftwareSerial.h>
+TinyGPSPlus gps;  // The TinyGPS++ object
+SoftwareSerial ss(4, 5); // The serial connection to the GPS device
+const char* ssid = "POCO F1";
+const char* password = "anubhav1";
+float latitude , longitude;
+float lat1,lon1;
+static int fl=0;
+WiFiServer server(80);
+int fv;
+WiFiClient client;
+unsigned long myChannelNumber = 717502; //Your Channel Number (Without Brackets)
+const char * myWriteAPIKey = "854IANACKQANIKAC"; //Your Write API Key
+char   host[] = "api.thingspeak.com"; // ThingSpeak address
+String APIkey = "716643";             // Thingspeak Read Key, works only if a PUBLIC viewable channel
+const int httpPort = 80; 
+
+const unsigned long HTTP_TIMEOUT = 10000;
+//bot movement pre fucntion begins
+/* define L298N or L293D motor control pins */
+int leftMotorForward = 12;
+int rightMotorForward = 15;
+int leftMotorBackward = 10;/* GPIO0(D3) -> IN4   */
+int rightMotorBackward = 13;
+int nb;
+static int ob=0;
+float diffb,dely;
+//bot movement pre function ends
+
+void setup() {
+  // put your setup code here, to run once:
+ Serial.begin(115200);
+Serial.print("prefunction");
+  ss.begin(9600);
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
+
+  server.begin();
+  Serial.println("Server started");
+
+  // Print the IP address
+  Serial.println(WiFi.localIP());
+
+//gps end
+//send data start
+ delay(10);
+ // Connect to WiFi network 
+ThingSpeak.begin(client);
+Serial.print("thingspeak started");
+//send data end
+ /* initialize motor control pins as output */
+  pinMode(leftMotorForward, OUTPUT);
+  pinMode(rightMotorForward, OUTPUT); 
+  pinMode(leftMotorBackward, OUTPUT);  
+  pinMode(rightMotorBackward, OUTPUT);
+}
+
+
+void loop()
+{
+while (ss.available() > 0)
+    if (gps.encode(ss.read()))
+    {
+      latitude=(gps.location.lat());
+  longitude=(gps.location.lng());
+  if(latitude>1)
+  {
+  lat1=latitude; 
+  lon1=longitude;
+      
+   
+  Serial.print("Lat:");
+  Serial.print(lat1);
+  Serial.print("lon:");
+  Serial.print(lon1);
+  delay(5000);
+
+delay(1000);
+ 
+ThingSpeak.writeField(725676, 1,lat1, "652T6IJ4DW1QD920");
+ThingSpeak.writeField(725675, 1,lon1, "T1UR0TTTNJCGUPGV");
+
+delay(5000);
+Serial.print("\n uploaded");
+Serial.print("Recieving data..");
+RetrieveTSChannelData();
+  delay(5000);
+  nb=fv;
+  if(nb>ob)
+    {
+      diffb=nb-ob;
+    }
+    else
+    {
+      diffb=360-(nb-ob);
+    }
+    Serial.print("bearing is");
+    Serial.print(diffb);
+    dely=(1.17*diffb)/16.19;
+    dely=dely+7000;
+    Serial.print("delay is :");
+    Serial.print(dely);
+    
+ if(nb>=0 && nb<180)
+ {
+    if(fl==0)
+    {
+    MotorBackward();
+    delay(dely);
+    fl=1;
+    }
+    else
+    {
+     MotorForward();
+     delay(dely);
+     fl=0; 
+    } 
+ }
+Serial.print("backward");
+MotorStop();
+delay(5000);
+}}}
+
+void RetrieveTSChannelData() {  // Receive data from Thingspeak
+  static char responseBuffer[3*1024]; // Buffer for received data
+  client = server.available(); 
+  if (!client.connect(host, httpPort)) { 
+    Serial.println("connection failed"); 
+    return; 
+  } 
+  String url = "/channels/" + APIkey; // Start building API request string
+  url += "/fields/1.json?results=5";  // 5 is the results request number, so 5 are returned, 1 woudl return the last result received
+  client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
+  while (!skipResponseHeaders());                      // Wait until there is some data and skip headers
+  while (client.available()) {                         // Now receive the data
+    String line = client.readStringUntil('\n');
+    if ( line.indexOf('{',0) >= 0 ) {                  // Ignore data that is not likely to be JSON formatted, so must contain a '{'
+      Serial.println(line);                            // Show the text received
+      line.toCharArray(responseBuffer, line.length()); // Convert to char array for the JSON decoder
+      decodeJSON(responseBuffer);                      // Decode the JSON text
+    }
+  }
+  client.stop();
+}
+
+bool skipResponseHeaders() { 
+  char endOfHeaders[] = "\r\n\r\n"; // HTTP headers end with an empty line 
+  client.setTimeout(HTTP_TIMEOUT); 
+  bool ok = client.find(endOfHeaders); 
+  if (!ok) { Serial.println("No response or invalid response!"); } 
+  return ok; 
+} 
+
+bool decodeJSON(char *json) {
+  StaticJsonBuffer <3*1024> jsonBuffer;
+  char *jsonstart = strchr(json, '{'); // Skip characters until first '{' found and ignore length, if present
+  if (jsonstart == NULL) {
+    Serial.println("JSON data missing");
+    return false;
+  }
+  json = jsonstart;
+  JsonObject& root = jsonBuffer.parseObject(json); // Parse JSON
+  if (!root.success()) {
+    Serial.println(F("jsonBuffer.parseObject() failed"));
+    return false;
+  }
+  JsonObject& root_data = root["channel"]; // Begins and ends within first set of { }
+  String id   = root_data["id"];
+  String name = root_data["name"];
+  String field1_name = root_data["field1"];
+  String datetime    = root_data["updated_at"];
+  Serial.println("\n\n Channel id: "+id+" Name: "+ name);
+  Serial.println(" Readings last updated at: "+datetime);
+  
+  for (int result = 0; result < 5; result++){
+    JsonObject& channel = root["feeds"][result]; // Now we can read 'feeds' values and so-on
+    String entry_id     = channel["entry_id"];
+    String field1value  = channel["field1"];
+    Serial.print(" Field1 entry number ["+entry_id+"] had a value of: ");
+    Serial.println(field1value);
+    //enter max value
+   fv=field1value.toInt(); //*8888888888888888888888888888888888888888888888888888888888888
+  }
+}
+void MotorStop(void)   
+{
+
+  digitalWrite(leftMotorForward,LOW);
+  digitalWrite(leftMotorBackward,LOW);
+  digitalWrite(rightMotorForward,LOW);
+  digitalWrite(rightMotorBackward,LOW);
+}
+void MotorForward(void)   
+{
+
+  digitalWrite(leftMotorForward,HIGH);
+  digitalWrite(rightMotorForward,HIGH);
+  digitalWrite(leftMotorBackward,LOW);
+  digitalWrite(rightMotorBackward,LOW);
+  
+}
+void MotorBackward(void)   
+{
+
+  digitalWrite(leftMotorBackward,HIGH);
+  digitalWrite(rightMotorBackward,HIGH);
+  digitalWrite(leftMotorForward,LOW);
+  digitalWrite(rightMotorForward,LOW);
+}
