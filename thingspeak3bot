@@ -1,0 +1,50 @@
+% TODO - Replace the [] with channel ID to read data from:
+readChannelID =716675;
+readChannelID1 =716686;
+readChannelID2 =717502;
+readChannelID3 =717515;
+readChannelID4 =725676;
+readChannelID5 =725675;
+% TODO - Enter the Read API Key between the '' below:
+readAPIKey = 'VV3H191M46MA1SZX';
+readAPIKey1 = 'FANXU4N7I8EFJJJD';
+readAPIKey2 = 'SQOXJ38Y2LXHQTDE';
+readAPIKey3 ='68YXJQ5UEJAG6AR2';
+readAPIKey4 ='L6FUGU98BV3ZQLI7';
+readAPIKey5 ='MHWY89ZL545RGUIX';
+% TODO - Replace the [] with channel ID to write data to:
+writeChannelID =716643;
+% TODO - Enter the Write API Key between the '' below:
+writeAPIKey = 'BDWILOQ33C4WH2KJ';
+%% Read Data %%
+data = thingSpeakRead(readChannelID, 'ReadKey', readAPIKey);
+data1= thingSpeakRead(readChannelID1, 'ReadKey', readAPIKey1);
+lat1= thingSpeakRead(readChannelID2, 'ReadKey', readAPIKey2);
+lon1= thingSpeakRead(readChannelID3, 'ReadKey', readAPIKey3);
+lat2= thingSpeakRead(readChannelID4, 'ReadKey', readAPIKey4);
+lon2= thingSpeakRead(readChannelID5, 'ReadKey', readAPIKey5);
+%lat1=55.739399;
+%lon1=37.592572;
+%data=12.34;
+%data1=34.234;
+%lat2=55.735632;
+%lon2=37.678367;
+res=azimuth(lat1,lon1,data,data1);
+res2=azimuth(lat2,lon2,data,data1);
+a = 1;
+b = 3;
+r = (b-a).*rand(1,1) + a;
+%sprintf("Angle Between Co ordinates is: %f degrees",res)
+%sprintf("Distance Between co ordinates is: %f Km",res2)
+if(r>=1 && r<2)
+    resfinal=res;
+else
+    resfinal=res2;
+end
+sprintf("Angle Between Co ordinates is: %f degrees",resfinal)
+%% Analyze Data %%
+% Add code in this section to analyze data and store the result in the
+% analyzedData variable.
+analyzedData = resfinal;
+%% Write Data %%
+thingSpeakWrite(writeChannelID, analyzedData, 'WriteKey', writeAPIKey);
